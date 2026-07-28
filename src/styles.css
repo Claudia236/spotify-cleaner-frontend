@@ -1,0 +1,156 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #121212;
+  color: #f2f2f2;
+}
+
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.app-header h1 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: #b3b3b3;
+  margin-top: 0;
+}
+
+.card {
+  background: #1e1e1e;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.login-card {
+  text-align: center;
+}
+
+.button {
+  background: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #1db954;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+}
+
+.banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.banner-error {
+  background: #4a1414;
+  color: #ffb4b4;
+}
+
+.banner-success {
+  background: #14401f;
+  color: #b7f0c2;
+}
+
+select,
+input[type="number"] {
+  background: #2a2a2a;
+  color: #f2f2f2;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-left: 8px;
+}
+
+.tracking-status {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.settings-form {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.candidates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.candidates-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.candidates-table th {
+  text-align: left;
+  color: #b3b3b3;
+  font-weight: 500;
+  border-bottom: 1px solid #333;
+  padding: 8px;
+}
+
+.candidates-table td {
+  padding: 8px;
+  border-bottom: 1px solid #2a2a2a;
+  vertical-align: middle;
+}
+
+.track-name {
+  font-weight: 600;
+}
+
+.track-artist {
+  color: #b3b3b3;
+  font-size: 13px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.tag-skip {
+  background: #4a1414;
+  color: #ffb4b4;
+}
+
+.tag-stale {
+  background: #2a2a4a;
+  color: #b4c2ff;
+}
