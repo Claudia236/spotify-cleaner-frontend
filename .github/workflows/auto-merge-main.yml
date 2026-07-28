@@ -1,0 +1,33 @@
+name: Auto-merge to main
+
+on:
+  push:
+    branches:
+      - claude/spotify-playlist-manager-vj2f2s
+
+permissions:
+  contents: write
+
+jobs:
+  merge-to-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge feature branch into main
+        run: |
+          git fetch origin claude/spotify-playlist-manager-vj2f2s
+          git merge --no-ff origin/claude/spotify-playlist-manager-vj2f2s \
+            -m "Auto-merge claude/spotify-playlist-manager-vj2f2s into main [skip ci]"
+
+      - name: Push main
+        run: git push origin main
