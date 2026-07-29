@@ -1,4 +1,4 @@
-# Spotify Playlist Cleaner — Frontend
+# Spotify Cleaner — Frontend
 
 Interfaccia React per collegare il tuo account Spotify, vedere i brani di una playlist skippati spesso o
 non ascoltati da tempo, e spostarli in un'altra playlist con conferma manuale.
