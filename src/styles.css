@@ -121,9 +121,36 @@ input[type="number"] {
   opacity: 0.35;
 }
 
-.pagination-label {
-  color: #b3b3b3;
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-page {
+  background: none;
+  border: 1px solid #3a3a3a;
+  color: #f2f2f2;
+  border-radius: 6px;
+  padding: 4px 10px;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.pagination-page:hover {
+  border-color: #1db954;
+}
+
+.pagination-page-active {
+  background: #1db954;
+  border-color: #1db954;
+  color: #fff;
+  font-weight: 600;
+}
+
+.pagination-ellipsis {
+  color: #b3b3b3;
+  padding: 0 4px;
 }
 
 .candidates-header {
