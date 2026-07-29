@@ -3,6 +3,18 @@ import { api, TrackedTrack } from "../api";
 
 const PAGE_SIZE = 10;
 
+function pageNumbers(current: number, total: number): (number | "...")[] {
+  const pages: (number | "...")[] = [];
+  for (let i = 0; i < total; i++) {
+    if (i === 0 || i === total - 1 || Math.abs(i - current) <= 1) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== "...") {
+      pages.push("...");
+    }
+  }
+  return pages;
+}
+
 function formatLastPlayed(track: TrackedTrack): string {
   if (!track.lastPlayedAt) return "mai osservato";
   const days = Math.floor((Date.now() - new Date(track.lastPlayedAt).getTime()) / (24 * 60 * 60 * 1000));
@@ -85,8 +97,22 @@ export default function TrackedTracksPanel({
                 >
                   ‹ Precedente
                 </button>
-                <span className="pagination-label">
-                  Pagina {page + 1} di {totalPages}
+                <span className="pagination-pages">
+                  {pageNumbers(page, totalPages).map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="pagination-ellipsis">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        className={`pagination-page ${p === page ? "pagination-page-active" : ""}`}
+                        onClick={() => setPage(p)}
+                      >
+                        {p + 1}
+                      </button>
+                    )
+                  )}
                 </span>
                 <button
                   className="button pagination-button"
