@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, CandidatesResponse, Playlist, TrackingStatus } from "../api";
 import CandidatesList from "./CandidatesList";
 import SettingsPanel from "./SettingsPanel";
+import TrackedTracksPanel from "./TrackedTracksPanel";
 
 function formatTrackingSince(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000));
@@ -43,10 +44,10 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       {tracking && (
-        <div className="card tracking-status">
-          Tracciamento attivo {formatTrackingSince(tracking.trackingStartedAt)} — {tracking.trackedTrackCount}{" "}
-          brani osservati finora.
-        </div>
+        <TrackedTracksPanel
+          trackedTrackCount={tracking.trackedTrackCount}
+          trackingSinceLabel={formatTrackingSince(tracking.trackingStartedAt)}
+        />
       )}
 
       <SettingsPanel onSaved={refresh} />

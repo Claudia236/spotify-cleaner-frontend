@@ -37,6 +37,15 @@ export interface TrackingStatus {
   trackedTrackCount: number;
 }
 
+export interface TrackedTrack {
+  id: string;
+  name: string;
+  artist: string | null;
+  skipCount: number;
+  playCount: number;
+  lastPlayedAt: string | null;
+}
+
 export interface Settings {
   id: number;
   destination_playlist_id: string | null;
@@ -61,6 +70,7 @@ export const api = {
   authStatus: () => request<AuthStatus>("/auth/status"),
   loginUrl: () => `${API_URL}/auth/login`,
   trackingStatus: () => request<TrackingStatus>("/api/tracking-status"),
+  trackedTracks: () => request<TrackedTrack[]>("/api/tracked-tracks"),
   playlists: () => request<Playlist[]>("/api/playlists"),
   candidates: (playlistId: string) => request<CandidatesResponse>(`/api/playlists/${playlistId}/candidates`),
   move: (playlistId: string, trackUris: string[]) =>
