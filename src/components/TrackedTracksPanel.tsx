@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { api, TrackedTrack } from "../api";
 
+const PAGE_SIZE = 10;
+
 function formatLastPlayed(track: TrackedTrack): string {
   if (!track.lastPlayedAt) return "mai osservato";
   const days = Math.floor((Date.now() - new Date(track.lastPlayedAt).getTime()) / (24 * 60 * 60 * 1000));
@@ -20,6 +22,7 @@ export default function TrackedTracksPanel({
   const [tracks, setTracks] = useState<TrackedTrack[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
 
   const toggle = () => {
     const next = !open;
@@ -35,6 +38,9 @@ export default function TrackedTracksPanel({
     }
   };
 
+  const totalPages = tracks ? Math.max(1, Math.ceil(tracks.length / PAGE_SIZE)) : 1;
+  const pageTracks = tracks ? tracks.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE) : [];
+
   return (
     <div className="card">
       <button className="link-button" onClick={toggle}>
@@ -48,27 +54,49 @@ export default function TrackedTracksPanel({
           {error && <div className="banner banner-error">{error}</div>}
           {tracks && tracks.length === 0 && <p>Nessun brano osservato finora.</p>}
           {tracks && tracks.length > 0 && (
-            <table className="candidates-table">
-              <thead>
-                <tr>
-                  <th>Brano</th>
-                  <th>Skip</th>
-                  <th>Ultimo ascolto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tracks.map((t) => (
-                  <tr key={t.id}>
-                    <td>
-                      <div className="track-name">{t.name}</div>
-                      {t.artist && <div className="track-artist">{t.artist}</div>}
-                    </td>
-                    <td>{t.skipCount}</td>
-                    <td>{formatLastPlayed(t)}</td>
+            <>
+              <table className="candidates-table">
+                <thead>
+                  <tr>
+                    <th>Brano</th>
+                    <th>Skip</th>
+                    <th>Ultimo ascolto</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pageTracks.map((t) => (
+                    <tr key={t.id}>
+                      <td>
+                        <div className="track-name">{t.name}</div>
+                        {t.artist && <div className="track-artist">{t.artist}</div>}
+                      </td>
+                      <td>{t.skipCount}</td>
+                      <td>{formatLastPlayed(t)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="pagination">
+                <button
+                  className="button pagination-button"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                >
+                  ‹ Precedente
+                </button>
+                <span className="pagination-label">
+                  Pagina {page + 1} di {totalPages}
+                </span>
+                <button
+                  className="button pagination-button"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                >
+                  Successiva ›
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

@@ -104,6 +104,28 @@ input[type="number"] {
   margin-top: 12px;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.pagination-button {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+.pagination-button:disabled {
+  opacity: 0.35;
+}
+
+.pagination-label {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
 .candidates-header {
   display: flex;
   justify-content: space-between;
