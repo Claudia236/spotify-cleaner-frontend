@@ -153,6 +153,19 @@ input[type="number"] {
   padding: 0 4px;
 }
 
+.candidates-group {
+  margin-top: 20px;
+}
+
+.candidates-group-title {
+  color: #b3b3b3;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+}
+
 .candidates-header {
   display: flex;
   justify-content: space-between;

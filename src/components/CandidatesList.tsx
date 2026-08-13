@@ -9,6 +9,49 @@ function formatLastPlayed(candidate: Candidate): string {
   return `${days} giorni fa`;
 }
 
+function CandidatesTable({
+  candidates,
+  selected,
+  onToggle,
+}: {
+  candidates: Candidate[];
+  selected: Set<string>;
+  onToggle: (uri: string) => void;
+}) {
+  return (
+    <table className="candidates-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Brano</th>
+          <th>Skip</th>
+          <th>Ultimo ascolto</th>
+          <th>Motivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {candidates.map((c) => (
+          <tr key={c.id}>
+            <td>
+              <input type="checkbox" checked={selected.has(c.uri)} onChange={() => onToggle(c.uri)} />
+            </td>
+            <td>
+              <div className="track-name">{c.name}</div>
+              <div className="track-artist">{c.artist}</div>
+            </td>
+            <td>{c.skipCount}</td>
+            <td>{formatLastPlayed(c)}</td>
+            <td>
+              {c.isSkipCandidate && <span className="tag tag-skip">skip</span>}
+              {c.isStaleCandidate && <span className="tag tag-stale">non ascoltato</span>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 export default function CandidatesList({
   playlistId,
   data,
@@ -66,6 +109,9 @@ export default function CandidatesList({
     );
   }
 
+  const neverObserved = data.candidates.filter((c) => !c.lastPlayedAt);
+  const observed = data.candidates.filter((c) => c.lastPlayedAt);
+
   return (
     <div className="card">
       <div className="candidates-header">
@@ -85,36 +131,19 @@ export default function CandidatesList({
       {error && <div className="banner banner-error">{error}</div>}
       {successMessage && <div className="banner banner-success">{successMessage}</div>}
 
-      <table className="candidates-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Brano</th>
-            <th>Skip</th>
-            <th>Ultimo ascolto</th>
-            <th>Motivo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.candidates.map((c) => (
-            <tr key={c.id}>
-              <td>
-                <input type="checkbox" checked={selected.has(c.uri)} onChange={() => toggle(c.uri)} />
-              </td>
-              <td>
-                <div className="track-name">{c.name}</div>
-                <div className="track-artist">{c.artist}</div>
-              </td>
-              <td>{c.skipCount}</td>
-              <td>{formatLastPlayed(c)}</td>
-              <td>
-                {c.isSkipCandidate && <span className="tag tag-skip">skip</span>}
-                {c.isStaleCandidate && <span className="tag tag-stale">non ascoltato</span>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {observed.length > 0 && (
+        <div className="candidates-group">
+          <h3 className="candidates-group-title">Con dati di ascolto ({observed.length})</h3>
+          <CandidatesTable candidates={observed} selected={selected} onToggle={toggle} />
+        </div>
+      )}
+
+      {neverObserved.length > 0 && (
+        <div className="candidates-group">
+          <h3 className="candidates-group-title">Mai osservati ({neverObserved.length})</h3>
+          <CandidatesTable candidates={neverObserved} selected={selected} onToggle={toggle} />
+        </div>
+      )}
     </div>
   );
 }
