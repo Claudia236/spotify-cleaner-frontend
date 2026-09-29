@@ -9,60 +9,17 @@ function formatLastPlayed(candidate: Candidate): string {
   return `${days} giorni fa`;
 }
 
-function CandidatesTable({
-  candidates,
-  selected,
-  onToggle,
-}: {
-  candidates: Candidate[];
-  selected: Set<string>;
-  onToggle: (uri: string) => void;
-}) {
-  return (
-    <table className="candidates-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Brano</th>
-          <th>Skip</th>
-          <th>Ultimo ascolto</th>
-          <th>Motivo</th>
-        </tr>
-      </thead>
-      <tbody>
-        {candidates.map((c) => (
-          <tr key={c.id}>
-            <td>
-              <input type="checkbox" checked={selected.has(c.uri)} onChange={() => onToggle(c.uri)} />
-            </td>
-            <td>
-              <div className="track-name">{c.name}</div>
-              <div className="track-artist">{c.artist}</div>
-            </td>
-            <td>{c.skipCount}</td>
-            <td>{formatLastPlayed(c)}</td>
-            <td>
-              {c.isSkipCandidate && <span className="tag tag-skip">skip</span>}
-              {c.isStaleCandidate && <span className="tag tag-stale">non ascoltato</span>}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
 export default function CandidatesList({
   playlistId,
   data,
-  onMoved,
+  onCopied,
 }: {
   playlistId: string;
   data: CandidatesResponse;
-  onMoved: () => void;
+  onCopied: () => void;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [moving, setMoving] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -83,34 +40,30 @@ export default function CandidatesList({
     }
   };
 
-  const moveSelected = async () => {
+  const copySelected = async () => {
     if (selected.size === 0) return;
-    setMoving(true);
+    setCopying(true);
     setError(null);
     setSuccessMessage(null);
     try {
-      const result = await api.move(playlistId, Array.from(selected));
-      setSuccessMessage(`Spostati ${result.movedCount} brani.`);
+      const result = await api.copyToFavorites(playlistId, Array.from(selected));
+      setSuccessMessage(`Copiati ${result.copiedCount} brani nei preferiti.`);
       setSelected(new Set());
-      onMoved();
+      onCopied();
     } catch (e) {
       setError(String(e));
     } finally {
-      setMoving(false);
+      setCopying(false);
     }
   };
 
   if (data.candidates.length === 0) {
     return (
       <div className="card">
-        Nessun brano candidato al momento (soglie: skip ≥ {data.skipThreshold}, non ascoltato da ≥{" "}
-        {data.daysThreshold} giorni).
+        Nessun brano candidato al momento (ascolti prolungati ≥ {data.longListenThreshold}).
       </div>
     );
   }
-
-  const neverObserved = data.candidates.filter((c) => !c.lastPlayedAt);
-  const observed = data.candidates.filter((c) => c.lastPlayedAt);
 
   return (
     <div className="card">
@@ -123,27 +76,39 @@ export default function CandidatesList({
           />
           Seleziona tutti ({data.candidates.length})
         </label>
-        <button className="button" disabled={selected.size === 0 || moving} onClick={moveSelected}>
-          {moving ? "Spostamento…" : `Sposta selezionati (${selected.size})`}
+        <button className="button" disabled={selected.size === 0 || copying} onClick={copySelected}>
+          {copying ? "Copia in corso…" : `Copia selezionati nei preferiti (${selected.size})`}
         </button>
       </div>
 
       {error && <div className="banner banner-error">{error}</div>}
       {successMessage && <div className="banner banner-success">{successMessage}</div>}
 
-      {observed.length > 0 && (
-        <div className="candidates-group">
-          <h3 className="candidates-group-title">Con dati di ascolto ({observed.length})</h3>
-          <CandidatesTable candidates={observed} selected={selected} onToggle={toggle} />
-        </div>
-      )}
-
-      {neverObserved.length > 0 && (
-        <div className="candidates-group">
-          <h3 className="candidates-group-title">Mai osservati ({neverObserved.length})</h3>
-          <CandidatesTable candidates={neverObserved} selected={selected} onToggle={toggle} />
-        </div>
-      )}
+      <table className="candidates-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Brano</th>
+            <th>Ascolti prolungati</th>
+            <th>Ultimo ascolto</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.candidates.map((c) => (
+            <tr key={c.id}>
+              <td>
+                <input type="checkbox" checked={selected.has(c.uri)} onChange={() => toggle(c.uri)} />
+              </td>
+              <td>
+                <div className="track-name">{c.name}</div>
+                <div className="track-artist">{c.artist}</div>
+              </td>
+              <td>{c.longListenCount}</td>
+              <td>{formatLastPlayed(c)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

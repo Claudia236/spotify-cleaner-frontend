@@ -2,22 +2,20 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 
 export default function SettingsPanel({ onSaved }: { onSaved: () => void }) {
-  const [skipThreshold, setSkipThreshold] = useState(7);
-  const [daysThreshold, setDaysThreshold] = useState(60);
+  const [longListenThreshold, setLongListenThreshold] = useState(5);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api.getSettings().then((s) => {
-      setSkipThreshold(s.skip_threshold);
-      setDaysThreshold(s.days_threshold);
+      setLongListenThreshold(s.long_listen_threshold);
     });
   }, []);
 
   const save = async () => {
     setSaving(true);
     try {
-      await api.updateSettings({ skipThreshold, daysThreshold });
+      await api.updateSettings({ longListenThreshold });
       onSaved();
     } finally {
       setSaving(false);
@@ -32,21 +30,12 @@ export default function SettingsPanel({ onSaved }: { onSaved: () => void }) {
       {open && (
         <div className="settings-form">
           <label>
-            Skip minimi
+            Ascolti prolungati minimi
             <input
               type="number"
               min={1}
-              value={skipThreshold}
-              onChange={(e) => setSkipThreshold(Number(e.target.value))}
-            />
-          </label>
-          <label>
-            Giorni senza ascolto
-            <input
-              type="number"
-              min={1}
-              value={daysThreshold}
-              onChange={(e) => setDaysThreshold(Number(e.target.value))}
+              value={longListenThreshold}
+              onChange={(e) => setLongListenThreshold(Number(e.target.value))}
             />
           </label>
           <button className="button" disabled={saving} onClick={save}>

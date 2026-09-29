@@ -27,7 +27,7 @@ export default function App() {
       <header className="app-header">
         <h1>Spotify Cleaner</h1>
         <p className="subtitle">
-          Trova i brani skippati spesso o non ascoltati da tempo e spostali in un'altra playlist.
+          Trova i brani che ascolti a lungo e spesso e copiali nella tua playlist preferiti.
         </p>
       </header>
 
