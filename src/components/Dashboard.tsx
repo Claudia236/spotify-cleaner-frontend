@@ -75,7 +75,7 @@ export default function Dashboard() {
         <CandidatesList
           playlistId={selectedPlaylistId}
           data={candidates}
-          onMoved={() => {
+          onCopied={() => {
             refresh();
           }}
         />

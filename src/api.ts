@@ -13,15 +13,12 @@ export interface Candidate {
   artist: string;
   album: string | null;
   addedAt: string;
-  skipCount: number;
+  longListenCount: number;
   lastPlayedAt: string | null;
-  isSkipCandidate: boolean;
-  isStaleCandidate: boolean;
 }
 
 export interface CandidatesResponse {
-  skipThreshold: number;
-  daysThreshold: number;
+  longListenThreshold: number;
   trackingStartedAt: string;
   candidates: Candidate[];
 }
@@ -41,7 +38,7 @@ export interface TrackedTrack {
   id: string;
   name: string;
   artist: string | null;
-  skipCount: number;
+  longListenCount: number;
   playCount: number;
   lastPlayedAt: string | null;
 }
@@ -49,8 +46,7 @@ export interface TrackedTrack {
 export interface Settings {
   id: number;
   destination_playlist_id: string | null;
-  skip_threshold: number;
-  days_threshold: number;
+  long_listen_threshold: number;
   tracking_started_at: string;
 }
 
@@ -73,12 +69,15 @@ export const api = {
   trackedTracks: () => request<TrackedTrack[]>("/api/tracked-tracks"),
   playlists: () => request<Playlist[]>("/api/playlists"),
   candidates: (playlistId: string) => request<CandidatesResponse>(`/api/playlists/${playlistId}/candidates`),
-  move: (playlistId: string, trackUris: string[]) =>
-    request<{ movedCount: number; destinationPlaylistId: string }>(`/api/playlists/${playlistId}/move`, {
-      method: "POST",
-      body: JSON.stringify({ trackUris }),
-    }),
+  copyToFavorites: (playlistId: string, trackUris: string[]) =>
+    request<{ copiedCount: number; destinationPlaylistId: string }>(
+      `/api/playlists/${playlistId}/copy-to-favorites`,
+      {
+        method: "POST",
+        body: JSON.stringify({ trackUris }),
+      }
+    ),
   getSettings: () => request<Settings>("/api/settings"),
-  updateSettings: (patch: Partial<{ skipThreshold: number; daysThreshold: number }>) =>
+  updateSettings: (patch: Partial<{ longListenThreshold: number }>) =>
     request<Settings>("/api/settings", { method: "PUT", body: JSON.stringify(patch) }),
 };

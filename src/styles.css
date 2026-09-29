@@ -210,13 +210,3 @@ input[type="number"] {
   font-size: 12px;
   margin-right: 4px;
 }
-
-.tag-skip {
-  background: #4a1414;
-  color: #ffb4b4;
-}
-
-.tag-stale {
-  background: #2a2a4a;
-  color: #b4c2ff;
-}
