@@ -14,13 +14,16 @@ export interface Candidate {
   album: string | null;
   addedAt: string;
   longListenCount: number;
+  skipCount: number;
   lastPlayedAt: string | null;
 }
 
 export interface CandidatesResponse {
   longListenThreshold: number;
+  skipThreshold: number;
   trackingStartedAt: string;
-  candidates: Candidate[];
+  longListenCandidates: Candidate[];
+  skipCandidates: Candidate[];
 }
 
 export interface AuthStatus {
@@ -39,6 +42,7 @@ export interface TrackedTrack {
   name: string;
   artist: string | null;
   longListenCount: number;
+  skipCount: number;
   playCount: number;
   lastPlayedAt: string | null;
 }
@@ -46,7 +50,9 @@ export interface TrackedTrack {
 export interface Settings {
   id: number;
   destination_playlist_id: string | null;
+  skip_destination_playlist_id: string | null;
   long_listen_threshold: number;
+  skip_threshold: number;
   tracking_started_at: string;
 }
 
@@ -77,7 +83,15 @@ export const api = {
         body: JSON.stringify({ trackUris }),
       }
     ),
+  moveToReview: (playlistId: string, trackUris: string[]) =>
+    request<{ movedCount: number; destinationPlaylistId: string }>(
+      `/api/playlists/${playlistId}/move-to-review`,
+      {
+        method: "POST",
+        body: JSON.stringify({ trackUris }),
+      }
+    ),
   getSettings: () => request<Settings>("/api/settings"),
-  updateSettings: (patch: Partial<{ longListenThreshold: number }>) =>
+  updateSettings: (patch: Partial<{ longListenThreshold: number; skipThreshold: number }>) =>
     request<Settings>("/api/settings", { method: "PUT", body: JSON.stringify(patch) }),
 };

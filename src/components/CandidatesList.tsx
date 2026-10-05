@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, Candidate, CandidatesResponse } from "../api";
+import { Candidate, CandidatesResponse } from "../api";
 
 function formatLastPlayed(candidate: Candidate): string {
   if (!candidate.lastPlayedAt) return "mai osservato";
@@ -9,17 +9,25 @@ function formatLastPlayed(candidate: Candidate): string {
   return `${days} giorni fa`;
 }
 
-export default function CandidatesList({
-  playlistId,
-  data,
-  onCopied,
+function CandidateGroup({
+  candidates,
+  countLabel,
+  countValue,
+  actionLabel,
+  actionInProgressLabel,
+  successTemplate,
+  onAction,
 }: {
-  playlistId: string;
-  data: CandidatesResponse;
-  onCopied: () => void;
+  candidates: Candidate[];
+  countLabel: string;
+  countValue: (c: Candidate) => number;
+  actionLabel: string;
+  actionInProgressLabel: string;
+  successTemplate: (count: number) => string;
+  onAction: (trackUris: string[]) => Promise<void>;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [copying, setCopying] = useState(false);
+  const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -33,51 +41,39 @@ export default function CandidatesList({
   };
 
   const toggleAll = () => {
-    if (selected.size === data.candidates.length) {
+    if (selected.size === candidates.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(data.candidates.map((c) => c.uri)));
+      setSelected(new Set(candidates.map((c) => c.uri)));
     }
   };
 
-  const copySelected = async () => {
+  const runAction = async () => {
     if (selected.size === 0) return;
-    setCopying(true);
+    setRunning(true);
     setError(null);
     setSuccessMessage(null);
+    const uris = Array.from(selected);
     try {
-      const result = await api.copyToFavorites(playlistId, Array.from(selected));
-      setSuccessMessage(`Copiati ${result.copiedCount} brani nei preferiti.`);
+      await onAction(uris);
+      setSuccessMessage(successTemplate(uris.length));
       setSelected(new Set());
-      onCopied();
     } catch (e) {
       setError(String(e));
     } finally {
-      setCopying(false);
+      setRunning(false);
     }
   };
-
-  if (data.candidates.length === 0) {
-    return (
-      <div className="card">
-        Nessun brano candidato al momento (ascolti prolungati ≥ {data.longListenThreshold}).
-      </div>
-    );
-  }
 
   return (
     <div className="card">
       <div className="candidates-header">
         <label>
-          <input
-            type="checkbox"
-            checked={selected.size === data.candidates.length}
-            onChange={toggleAll}
-          />
-          Seleziona tutti ({data.candidates.length})
+          <input type="checkbox" checked={selected.size === candidates.length} onChange={toggleAll} />
+          Seleziona tutti ({candidates.length})
         </label>
-        <button className="button" disabled={selected.size === 0 || copying} onClick={copySelected}>
-          {copying ? "Copia in corso…" : `Copia selezionati nei preferiti (${selected.size})`}
+        <button className="button" disabled={selected.size === 0 || running} onClick={runAction}>
+          {running ? actionInProgressLabel : `${actionLabel} (${selected.size})`}
         </button>
       </div>
 
@@ -89,12 +85,12 @@ export default function CandidatesList({
           <tr>
             <th></th>
             <th>Brano</th>
-            <th>Ascolti prolungati</th>
+            <th>{countLabel}</th>
             <th>Ultimo ascolto</th>
           </tr>
         </thead>
         <tbody>
-          {data.candidates.map((c) => (
+          {candidates.map((c) => (
             <tr key={c.id}>
               <td>
                 <input type="checkbox" checked={selected.has(c.uri)} onChange={() => toggle(c.uri)} />
@@ -103,12 +99,78 @@ export default function CandidatesList({
                 <div className="track-name">{c.name}</div>
                 <div className="track-artist">{c.artist}</div>
               </td>
-              <td>{c.longListenCount}</td>
+              <td>{countValue(c)}</td>
               <td>{formatLastPlayed(c)}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+export default function CandidatesList({
+  data,
+  onCopied,
+  onMoved,
+  copyToFavorites,
+  moveToReview,
+}: {
+  data: CandidatesResponse;
+  onCopied: () => void;
+  onMoved: () => void;
+  copyToFavorites: (trackUris: string[]) => Promise<{ copiedCount: number; destinationPlaylistId: string }>;
+  moveToReview: (trackUris: string[]) => Promise<{ movedCount: number; destinationPlaylistId: string }>;
+}) {
+  const hasLongListen = data.longListenCandidates.length > 0;
+  const hasSkip = data.skipCandidates.length > 0;
+
+  if (!hasLongListen && !hasSkip) {
+    return (
+      <div className="card">
+        Nessun brano candidato al momento (ascolti prolungati ≥ {data.longListenThreshold}, skip ≥{" "}
+        {data.skipThreshold}).
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {hasLongListen && (
+        <>
+          <h3>Ascoltati a lungo e spesso</h3>
+          <CandidateGroup
+            candidates={data.longListenCandidates}
+            countLabel="Ascolti prolungati"
+            countValue={(c) => c.longListenCount}
+            actionLabel="Copia selezionati nei preferiti"
+            actionInProgressLabel="Copia in corso…"
+            successTemplate={(n) => `Copiati ${n} brani nei preferiti.`}
+            onAction={async (uris) => {
+              await copyToFavorites(uris);
+              onCopied();
+            }}
+          />
+        </>
+      )}
+
+      {hasSkip && (
+        <>
+          <h3>Skippati spesso</h3>
+          <CandidateGroup
+            candidates={data.skipCandidates}
+            countLabel="Skip"
+            countValue={(c) => c.skipCount}
+            actionLabel="Sposta selezionati in revisione"
+            actionInProgressLabel="Spostamento in corso…"
+            successTemplate={(n) => `Spostati ${n} brani nella playlist di revisione.`}
+            onAction={async (uris) => {
+              await moveToReview(uris);
+              onMoved();
+            }}
+          />
+        </>
+      )}
+    </>
   );
 }

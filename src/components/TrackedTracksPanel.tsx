@@ -72,6 +72,7 @@ export default function TrackedTracksPanel({
                   <tr>
                     <th>Brano</th>
                     <th>Ascolti prolungati</th>
+                    <th>Skip</th>
                     <th>Ultimo ascolto</th>
                   </tr>
                 </thead>
@@ -83,6 +84,7 @@ export default function TrackedTracksPanel({
                         {t.artist && <div className="track-artist">{t.artist}</div>}
                       </td>
                       <td>{t.longListenCount}</td>
+                      <td>{t.skipCount}</td>
                       <td>{formatLastPlayed(t)}</td>
                     </tr>
                   ))}
