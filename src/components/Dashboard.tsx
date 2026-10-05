@@ -73,11 +73,11 @@ export default function Dashboard() {
 
       {candidates && !loadingCandidates && (
         <CandidatesList
-          playlistId={selectedPlaylistId}
           data={candidates}
-          onCopied={() => {
-            refresh();
-          }}
+          onCopied={refresh}
+          onMoved={refresh}
+          copyToFavorites={(trackUris) => api.copyToFavorites(selectedPlaylistId, trackUris)}
+          moveToReview={(trackUris) => api.moveToReview(selectedPlaylistId, trackUris)}
         />
       )}
     </div>

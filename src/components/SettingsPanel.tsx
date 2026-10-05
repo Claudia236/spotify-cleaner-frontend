@@ -3,19 +3,21 @@ import { api } from "../api";
 
 export default function SettingsPanel({ onSaved }: { onSaved: () => void }) {
   const [longListenThreshold, setLongListenThreshold] = useState(5);
+  const [skipThreshold, setSkipThreshold] = useState(7);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     api.getSettings().then((s) => {
       setLongListenThreshold(s.long_listen_threshold);
+      setSkipThreshold(s.skip_threshold);
     });
   }, []);
 
   const save = async () => {
     setSaving(true);
     try {
-      await api.updateSettings({ longListenThreshold });
+      await api.updateSettings({ longListenThreshold, skipThreshold });
       onSaved();
     } finally {
       setSaving(false);
@@ -36,6 +38,15 @@ export default function SettingsPanel({ onSaved }: { onSaved: () => void }) {
               min={1}
               value={longListenThreshold}
               onChange={(e) => setLongListenThreshold(Number(e.target.value))}
+            />
+          </label>
+          <label>
+            Skip minimi
+            <input
+              type="number"
+              min={1}
+              value={skipThreshold}
+              onChange={(e) => setSkipThreshold(Number(e.target.value))}
             />
           </label>
           <button className="button" disabled={saving} onClick={save}>
